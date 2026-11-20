@@ -1,0 +1,330 @@
+
+{% load static %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Бронирование автомобиля — AutoRent</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+
+<header class="header">
+    <div class="container header-inner">
+        <a href="/" class="logo">Auto<span>Rent</span></a>
+
+        <button class="burger" id="burger" aria-label="Открыть меню">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+
+        <nav class="nav" id="nav">
+            <a href="/">Главная</a>
+            <a href="{% url 'catalog' %}">Автомобили</a>
+            <a href="#">О компании</a>
+            <a href="#">Контакты</a>
+            <a href="{% url 'rules' %}">Правила проката</a>
+            <a href="{% url 'profile' %}">Личный кабинет</a>
+        </nav>
+    </div>
+</header>
+
+<main class="booking-page">
+    <div class="container">
+
+        <div class="booking-heading">
+            <span class="section-label">БРОНИРОВАНИЕ</span>
+            <h1>Аренда автомобиля</h1>
+            <p>Заполните форму, чтобы забронировать автомобиль</p>
+        </div>
+
+        {% if success %}
+            <div class="booking-success">
+                <h2>Заявка заполнена!</h2>
+                <p>Форма прошла проверку. Сохранение бронирования подключим после настройки базы данных.</p>
+                <a href="{% url 'catalog' %}">Вернуться в каталог</a>
+            </div>
+        {% else %}
+
+        {% if errors %}
+            <div class="booking-errors">
+                {% for error in errors %}
+                    <p>{{ error }}</p>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <div class="booking-steps">
+            <div class="booking-step active" id="stepIndicator1">
+                <span>1</span>
+                <p>Автомобиль и даты</p>
+            </div>
+            <div class="step-line"></div>
+            <div class="booking-step" id="stepIndicator2">
+                <span>2</span>
+                <p>Ваши данные</p>
+            </div>
+        </div>
+
+        {% if messages %}
+    {% for message in messages %}
+        <div class="success-message">
+            {{ message }}
+        </div>
+    {% endfor %}
+{% endif %}
+
+        <form method="post"
+              action="{% url 'booking' %}"
+              class="booking-form"
+              id="bookingForm"
+              novalidate>
+
+            {% csrf_token %}
+
+            <div class="form-group">
+                <label for="{{ form.car_name.id_for_label }}">Автомобиль</label>
+                {{ form.car_name }}
+                {% for error in form.car_name.errors %}
+                    <div class="field-error">{{ error }}</div>
+                {% endfor %}
+            </div>
+
+            <div class="form-group">
+                <label for="{{ form.start_date.id_for_label }}">Дата получения</label>
+                {{ form.start_date }}
+                {% for error in form.start_date.errors %}
+                    <div class="field-error">{{ error }}</div>
+                {% endfor %}
+            </div>
+
+            <div class="form-group">
+                <label for="{{ form.end_date.id_for_label }}">Дата возврата</label>
+                {{ form.end_date }}
+                {% for error in form.end_date.errors %}
+                    <div class="field-error">{{ error }}</div>
+                {% endfor %}
+            </div>
+
+            <div class="form-group">
+                <label for="{{ form.full_name.id_for_label }}">ФИО</label>
+                {{ form.full_name }}
+                {% for error in form.full_name.errors %}
+                    <div class="field-error">{{ error }}</div>
+                {% endfor %}
+            </div>
+
+            <div class="form-group">
+                <label for="{{ form.phone.id_for_label }}">Телефон</label>
+                {{ form.phone }}
+                {% for error in form.phone.errors %}
+                    <div class="field-error">{{ error }}</div>
+                {% endfor %}
+            </div>
+
+            <div class="form-group">
+                <label for="{{ form.email.id_for_label }}">Электронная почта</label>
+                {{ form.email }}
+                {% for error in form.email.errors %}
+                    <div class="field-error">{{ error }}</div>
+                {% endfor %}
+            </div>
+
+            <div class="form-group">
+                <label for="{{ form.license_number.id_for_label }}">Номер водительского удостоверения</label>
+                {{ form.license_number }}
+                {% for error in form.license_number.errors %}
+                    <div class="field-error">{{ error }}</div>
+                {% endfor %}
+            </div>
+
+            <div class="form-group">
+                <label for="{{ form.license_date.id_for_label }}">Дата выдачи удостоверения</label>
+                {{ form.license_date }}
+                {% for error in form.license_date.errors %}
+                    <div class="field-error">{{ error }}</div>
+                {% endfor %}
+            </div>
+
+            <button type="submit">Отправить заявку</button>
+        </form>
+
+        {% endif %}
+    </div>
+</main>
+
+<footer class="footer">
+    <div class="container">
+        <p>© 2026 AutoRent. Прокат автомобилей.</p>
+    </div>
+</footer>
+
+<script src="{% static 'js/main.js' %}"></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const form = document.getElementById('bookingForm');
+
+    if (!form) {
+        return;
+    }
+
+    const fields = form.querySelectorAll(
+        'input:not([type="hidden"]), select, textarea'
+    );
+
+    // Настраиваем обязательные поля
+    fields.forEach(function (field) {
+        field.required = true;
+    });
+
+    // Указываем типы некоторых полей
+    const emailField = form.querySelector('[name="email"]');
+    const phoneField = form.querySelector('[name="phone"]');
+    const nameField = form.querySelector('[name="full_name"]');
+
+    if (emailField) {
+        emailField.type = 'email';
+    }
+
+    if (phoneField) {
+        phoneField.type = 'tel';
+    }
+
+    if (nameField) {
+        nameField.minLength = 2;
+    }
+
+    // Создаём место для ошибки рядом с полем
+    function showError(field, message) {
+        let error = field.parentElement.querySelector('.client-error');
+
+        if (!error) {
+            error = document.createElement('div');
+            error.className = 'field-error client-error';
+            field.insertAdjacentElement('afterend', error);
+        }
+
+        error.textContent = message;
+        field.setAttribute('aria-invalid', 'true');
+    }
+
+    // Удаляем ошибку
+    function clearError(field) {
+        const error = field.parentElement.querySelector('.client-error');
+
+        if (error) {
+            error.remove();
+        }
+
+        field.removeAttribute('aria-invalid');
+    }
+
+    // Проверяем одно поле
+    function validateField(field) {
+        clearError(field);
+
+        const value = field.value.trim();
+
+        if (field.required && value === '') {
+            showError(field, 'Это поле обязательно для заполнения.');
+            return false;
+        }
+
+        if (field.name === 'email' && value !== '') {
+            const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+
+            if (!emailPattern.test(value)) {
+                showError(field, 'Введите корректный адрес электронной почты.');
+                return false;
+            }
+        }
+
+        if (field.name === 'phone' && value !== '') {
+            const phonePattern = /^[+\d()\-\s]+$/;
+            const digits = value.replace(/\D/g, '');
+
+            if (!phonePattern.test(value) || digits.length < 10 || digits.length > 15) {
+                showError(field, 'Телефон должен содержать от 10 до 15 цифр.');
+                return false;
+            }
+        }
+
+        if (field.name === 'full_name' && value.length < 2) {
+            showError(field, 'ФИО должно содержать минимум 2 символа.');
+            return false;
+        }
+
+        if (field.maxLength > 0 && value.length > field.maxLength) {
+            showError(
+                field,
+                'Максимальная длина — ' + field.maxLength + ' символов.'
+            );
+            return false;
+        }
+        // Проверка даты возврата
+if (field.name === 'end_date') {
+    const startDate = form.querySelector('[name="start_date"]');
+
+    if (startDate.value && value <= startDate.value) {
+        showError(field, 'Дата возврата должна быть позже даты получения.');
+        return false;
+    }
+}
+
+// Проверка даты выдачи водительского удостоверения
+if (field.name === 'license_date') {
+    const today = new Date();
+    const selectedDate = new Date(value + 'T00:00:00');
+
+    today.setHours(0, 0, 0, 0);
+
+    if (value && selectedDate > today) {
+        showError(field, 'Дата выдачи удостоверения не может быть в будущем.');
+        return false;
+    }
+}
+
+        return true;
+    }
+
+    // Убираем ошибку при исправлении поля
+    fields.forEach(function (field) {
+        field.addEventListener('input', function () {
+            validateField(field);
+        });
+
+        field.addEventListener('change', function () {
+            validateField(field);
+        });
+    });
+
+    // Проверка перед отправкой формы
+    form.addEventListener('submit', function (event) {
+        let formIsValid = true;
+        let firstInvalidField = null;
+
+        fields.forEach(function (field) {
+            const isValid = validateField(field);
+
+            if (!isValid) {
+                formIsValid = false;
+
+                if (!firstInvalidField) {
+                    firstInvalidField = field;
+                }
+            }
+        });
+
+        if (!formIsValid) {
+            event.preventDefault();
+            firstInvalidField.focus();
+        }
+    });
+});
+</script>
+
+</body>
+</html>

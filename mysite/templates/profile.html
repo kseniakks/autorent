@@ -1,0 +1,196 @@
+
+{% load static %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Личный кабинет — AutoRent</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+
+<header class="header">
+    <div class="container header-inner">
+        <a href="/" class="logo">Auto<span>Rent</span></a>
+
+        <button class="burger" id="burger" aria-label="Открыть меню">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+
+        <nav class="nav" id="nav">
+            <a href="/">Главная</a>
+            <a href="{% url 'catalog' %}">Автомобили</a>
+            <a href="#">О компании</a>
+            <a href="#">Контакты</a>
+            <a href="{% url 'rules' %}">Правила проката</a>
+        </nav>
+    </div>
+</header>
+
+<main class="profile-page">
+    <div class="container">
+
+        <div class="profile-heading">
+            <span class="section-label">ЛИЧНЫЙ КАБИНЕТ</span>
+            <h1>Мой профиль</h1>
+            <p>Управляйте своими поездками и бронированиями</p>
+        </div>
+
+        <div class="profile-layout">
+
+            <aside class="profile-sidebar">
+                <button class="profile-menu-toggle" id="profileMenuToggle">
+                    <span>Меню профиля</span>
+                    <span>⌄</span>
+                </button>
+
+                <nav class="profile-menu" id="profileMenu">
+                    <a href="#profile-info" class="profile-menu-link active">
+                        <span>♙</span> Мои данные
+                    </a>
+                    <a href="#active-rent" class="profile-menu-link">
+                        <span>🚗</span> Активная аренда
+                    </a>
+                    <a href="#rent-history" class="profile-menu-link">
+                        <span>▤</span> История аренд
+                    </a>
+                    <a href="{% url 'catalog' %}" class="profile-menu-link">
+                        <span>＋</span> Арендовать автомобиль
+                    </a>
+                </nav>
+            </aside>
+
+            <section class="profile-content">
+
+                <div class="profile-info-card" id="profile-info">
+                    <h2>Мои данные</h2>
+
+                    <div class="profile-user">
+                        <div class="profile-avatar">И</div>
+                        <div>
+                            <h3>Иван Иванов</h3>
+                            <p>Клиент AutoRent</p>
+                        </div>
+                    </div>
+
+                    <div class="profile-data">
+                        <div>
+                            <span>Телефон</span>
+                            <strong>+7 (999) 123-45-67</strong>
+                        </div>
+                        <div>
+                            <span>Email</span>
+                            <strong>ivan@example.com</strong>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="active-rent-section" id="active-rent">
+                    <h2>Активная аренда</h2>
+
+                    {% if active_rent %}
+                    <div class="active-rent-card">
+                        <div class="active-rent-top">
+                            <div>
+                                <span class="rent-label">ТЕКУЩИЙ ЗАКАЗ</span>
+                                <h3>{{ active_rent.car_name }}</h3>
+                            </div>
+                            <span class="rent-active-status">Активна</span>
+                        </div>
+
+                        <div class="rent-details">
+                            <div>
+                                <span>Дата получения</span>
+                                <strong>{{ active_rent.start_date|date:"d.m.Y" }}</strong>
+                            </div>
+                            <div>
+                                <span>Дата возврата</span>
+                                <strong>{{ active_rent.end_date|date:"d.m.Y" }}</strong>
+                            </div>
+                            <div>
+                                <span>Стоимость за сутки</span>
+                                <strong>{{ active_rent.price|floatformat:0 }} ₽</strong>
+                            </div>
+                        </div>
+
+                        <a href="{% url 'catalog' %}" class="profile-action">
+                            Выбрать другой автомобиль
+                        </a>
+                    </div>
+                    {% else %}
+                    <div class="no-active-rent">
+                        <h3>У вас пока нет активной аренды</h3>
+                        <p>Выберите автомобиль из нашего каталога.</p>
+                        <a href="{% url 'catalog' %}" class="profile-action">
+                            Перейти в каталог
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <div class="rent-history-section" id="rent-history">
+                    <h2>История аренд</h2>
+
+                    {% for rent in rent_history %}
+                    <article class="history-card">
+
+                        <div class="history-card-heading">
+                            <div>
+                                <h3>{{ rent.car_name }}</h3>
+                                <p>
+                                    {{ rent.start_date|date:"d.m.Y" }}
+                                    — {{ rent.end_date|date:"d.m.Y" }}
+                                </p>
+                            </div>
+                            <span class="history-status">{{ rent.status }}</span>
+                        </div>
+
+                        <div class="history-price">
+                            Стоимость аренды:
+                            <strong>{{ rent.price|floatformat:0 }} ₽ / сутки</strong>
+                        </div>
+
+                        <div class="return-act">
+                            <h4>Акт возврата</h4>
+
+                            <div class="return-act-row">
+                                <span>Пробег при возврате</span>
+                                <strong>{{ rent.mileage|floatformat:1 }} км</strong>
+                            </div>
+
+                            <div class="return-act-row">
+                                <span>Состояние автомобиля</span>
+                                <strong>{{ rent.condition }}</strong>
+                            </div>
+
+                            <div class="return-act-row fine-row">
+                                <span>Штраф за повреждения</span>
+                                <strong>{{ rent.fine|floatformat:0 }} ₽</strong>
+                            </div>
+                        </div>
+
+                    </article>
+                    {% empty %}
+                    <div class="no-active-rent">
+                        <p>История аренд пока пуста.</p>
+                    </div>
+                    {% endfor %}
+                </div>
+
+            </section>
+        </div>
+    </div>
+</main>
+
+<footer class="footer">
+    <div class="container">
+        <p>© 2026 AutoRent. Прокат автомобилей.</p>
+    </div>
+</footer>
+
+<script src="{% static 'js/main.js' %}"></script>
+</body>
+</html>

@@ -1,0 +1,311 @@
+
+{% load static %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>АвтоПрокат — аренда автомобилей</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<header class="header">
+    <div class="container header-inner">
+        <a href="#" class="logo">
+            <span class="logo-icon">A</span>
+            АвтоПрокат
+        </a>
+
+        <button class="burger" id="burger" aria-label="Открыть меню" aria-expanded="false">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+
+        <nav class="nav" id="nav">
+            <a href="#" class="nav-link active">Главная</a>
+            <a href="#catalog" class="nav-link">Автомобили</a>
+            <a href="#advantages" class="nav-link">Преимущества</a>
+            <a href="#contacts" class="nav-link">Контакты</a>
+            <a href="{% url 'rules' %}">Правила проката</a>
+            <a href="{% url 'profile' %}">Личный кабинет</a>
+        </nav>
+    </div>
+</header>
+
+<main>
+
+    <!-- Первый экран -->
+    <section class="hero">
+        <div class="container hero-content">
+            <div class="hero-text">
+                <span class="hero-label">Аренда автомобилей без лишних хлопот</span>
+                <h1>Прокат автомобилей<br>для ваших <span>путешествий</span></h1>
+                <p>
+                    Выбирайте автомобиль под свои задачи.
+                    Комфортные поездки, прозрачные цены
+                    и удобное оформление аренды.
+                </p>
+
+                <div class="hero-buttons">
+                    <a href="#catalog" class="btn btn-primary">Выбрать автомобиль</a>
+                    <a href="#advantages" class="btn btn-outline">Подробнее</a>
+                </div>
+            </div>
+
+            <div class="hero-image">
+                <img
+                    src="https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?auto=format&fit=crop&w=1000&q=75"
+                    alt="Современный автомобиль"
+                    width="700"
+                    height="450"
+                >
+                <div class="image-badge">
+                    <span class="badge-icon">✓</span>
+                    <div>
+                        <strong>Просто и удобно</strong>
+                        <small>Бронирование онлайн</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Форма быстрого бронирования -->
+    <section class="booking-section">
+        <div class="container">
+            <div class="booking-card">
+                <div class="booking-heading">
+                    <div>
+                        <span class="section-label">Быстрое оформление</span>
+                        <h2>Найдите свой автомобиль</h2>
+                    </div>
+                    <span class="booking-icon">🚘</span>
+                </div>
+
+                <form class="booking-form" action="{% url 'search' %}" method="get">
+                    <div class="form-group">
+                        <label for="car-class">Класс автомобиля</label>
+                        <select id="car-class" name="class">
+                            <option value="">Все классы</option>
+                            <option value="Эконом">Эконом</option>
+                            <option value="Комфорт">Комфорт</option>
+                            <option value="Бизнес">Бизнес</option>
+                            <option value="Внедорожники">Внедорожники</option>
+                        </select>
+                    </div>
+                
+                    <div class="form-group">
+                        <label for="date-start">Дата получения</label>
+                        <input type="date" id="date-start" name="start_date" required>
+                    </div>
+                
+                    <div class="form-group">
+                        <label for="date-end">Дата возврата</label>
+                        <input type="date" id="date-end" name="end_date" required>
+                    </div>
+                
+                    <button type="submit" class="btn btn-primary calculate-btn">
+                        Рассчитать <span>→</span>
+                    </button>
+                </form>
+    <!-- Преимущества -->
+    <section class="advantages section" id="advantages">
+        <div class="container">
+            <div class="section-heading">
+                <span class="section-label">Почему выбирают нас</span>
+                <h2>Комфорт начинается с нас</h2>
+                <p>Мы заботимся о том, чтобы каждая ваша поездка была удобной.</p>
+            </div>
+
+            <div class="advantages-list">
+                <div class="advantage-item">
+                    <div class="advantage-icon">⌖</div>
+                    <div>
+                        <h3>Подача по городу</h3>
+                        <p>Доставим автомобиль в удобное для вас место.</p>
+                    </div>
+                </div>
+
+                <div class="advantage-item">
+                    <div class="advantage-icon">✓</div>
+                    <div>
+                        <h3>Новый автопарк</h3>
+                        <p>Все автомобили проходят регулярное обслуживание.</p>
+                    </div>
+                </div>
+
+                <div class="advantage-item">
+                    <div class="advantage-icon">₽</div>
+                    <div>
+                        <h3>Честные цены</h3>
+                        <p>Стоимость аренды известна заранее, без сюрпризов.</p>
+                    </div>
+                </div>
+
+                <div class="advantage-item">
+                    <div class="advantage-icon">◷</div>
+                    <div>
+                        <h3>Быстрое оформление</h3>
+                        <p>Минимум документов и удобное бронирование.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Популярные автомобили -->
+    <section class="popular section" id="catalog">
+        <div class="container">
+            <div class="popular-heading">
+                <div class="section-heading">
+                    <span class="section-label">Наш автопарк</span>
+                    <h2>Популярные автомобили</h2>
+                    <p>Выберите автомобиль для комфортной поездки.</p>
+                </div>
+
+                <a href="#" class="all-cars-link">Все автомобили →</a>
+            </div>
+
+            <div class="cars-list">
+
+                <article class="car-card">
+                    <div class="car-image">
+                        <span class="car-class">Эконом</span>
+                        <img
+                            src="https://images.unsplash.com/photo-1552519507-da3b142c6e3d?auto=format&fit=crop&w=650&q=75"
+                            alt="Chevrolet Camaro"
+                            width="650"
+                            height="400"
+                            loading="lazy"
+                        >
+                    </div>
+                    <div class="car-info">
+                        <span class="car-type">Эконом класс</span>
+                        <h3>Chevrolet Camaro</h3>
+                        <div class="car-details">
+                            <span>Автомат</span>
+                            <span>4 места</span>
+                            <span>Бензин</span>
+                        </div>
+                        <div class="car-bottom">
+                            <div class="car-price">3 500 ₽ <small>/ сутки</small></div>
+                            <a href="#" class="car-button">Подробнее</a>
+                        </div>
+                    </div>
+                </article>
+
+                <article class="car-card">
+                    <div class="car-image">
+                        <span class="car-class">Комфорт</span>
+                        <img
+                            src="https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=650&q=75"
+                            alt="Porsche 911"
+                            width="650"
+                            height="400"
+                            loading="lazy"
+                        >
+                    </div>
+                    <div class="car-info">
+                        <span class="car-type">Комфорт класс</span>
+                        <h3>Porsche 911</h3>
+                        <div class="car-details">
+                            <span>Автомат</span>
+                            <span>2 места</span>
+                            <span>Бензин</span>
+                        </div>
+                        <div class="car-bottom">
+                            <div class="car-price">6 000 ₽ <small>/ сутки</small></div>
+                            <a href="#" class="car-button">Подробнее</a>
+                        </div>
+                    </div>
+                </article>
+
+                <article class="car-card">
+                    <div class="car-image">
+                        <span class="car-class">Бизнес</span>
+                        <img
+                            src="https://images.unsplash.com/photo-1502957291543-d85480254bf8?auto=format&fit=crop&w=650&q=75"
+                            alt="Mercedes-Benz"
+                            width="650"
+                            height="400"
+                            loading="lazy"
+                        >
+                    </div>
+                    <div class="car-info">
+                        <span class="car-type">Бизнес класс</span>
+                        <h3>Mercedes-Benz</h3>
+                        <div class="car-details">
+                            <span>Автомат</span>
+                            <span>5 мест</span>
+                            <span>Бензин</span>
+                        </div>
+                        <div class="car-bottom">
+                            <div class="car-price">8 000 ₽ <small>/ сутки</small></div>
+                            <a href="#" class="car-button">Подробнее</a>
+                        </div>
+                    </div>
+                </article>
+
+                <article class="car-card">
+                    <div class="car-image">
+                        <span class="car-class">Внедорожник</span>
+                        <img
+                            src="https://images.unsplash.com/photo-1519641471654-76ce0107ad1b?auto=format&fit=crop&w=650&q=75"
+                            alt="Внедорожник"
+                            width="650"
+                            height="400"
+                            loading="lazy"
+                        >
+                    </div>
+                    <div class="car-info">
+                        <span class="car-type">Внедорожник</span>
+                        <h3>Land Rover</h3>
+                        <div class="car-details">
+                            <span>Автомат</span>
+                            <span>5 мест</span>
+                            <span>Дизель</span>
+                        </div>
+                        <div class="car-bottom">
+                            <div class="car-price">7 500 ₽ <small>/ сутки</small></div>
+                            <a href="#" class="car-button">Подробнее</a>
+                        </div>
+                    </div>
+                </article>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- Контакты -->
+    <section class="contacts section" id="contacts">
+        <div class="container contacts-content">
+            <div>
+                <span class="section-label">Мы всегда на связи</span>
+                <h2>Остались вопросы?</h2>
+                <p>Свяжитесь с нами, и мы поможем подобрать автомобиль.</p>
+            </div>
+            <a href="tel:+78001234567" class="btn btn-primary">8 (800) 123-45-67</a>
+        </div>
+    </section>
+
+</main>
+
+<footer class="footer">
+    <div class="container footer-inner">
+        <a href="#" class="logo footer-logo">
+            <span class="logo-icon">A</span>
+            АвтоПрокат
+        </a>
+        <p>© 2026 АвтоПрокат. Все права защищены.</p>
+        <a href="#contacts">Контакты</a>
+    </div>
+</footer>
+
+<script src="{% static 'js/main.js' %}"></script>
+</body>
+</html>

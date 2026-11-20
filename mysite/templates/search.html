@@ -1,0 +1,210 @@
+
+{% load static %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Результаты поиска — AutoRent</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+
+<header class="header">
+    <div class="container header-inner">
+        <a href="/" class="logo">Auto<span>Rent</span></a>
+
+        <button class="burger" id="burger" aria-label="Открыть меню">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+
+        <nav class="nav" id="nav">
+            <a href="/">Главная</a>
+            <a href="{% url 'catalog' %}">Автомобили</a>
+            <a href="{% url 'profile' %}">Личный кабинет</a>
+            <a href="#">О компании</a>
+        </nav>
+    </div>
+</header>
+
+<main class="catalog-page search-page">
+    <div class="container">
+
+        <div class="catalog-heading">
+            <div>
+                <span class="section-label">РЕЗУЛЬТАТЫ ПОИСКА</span>
+                <h1>Найдено {{ result_count }} авто</h1>
+
+                <p>
+                    {% if selected_class %}
+                        Класс: {{ selected_class }}
+                    {% else %}
+                        Все классы автомобилей
+                    {% endif %}
+
+                    {% if start_date and end_date %}
+                        · с {{ start_date|date:"d.m.Y" }}
+                        по {{ end_date|date:"d.m.Y" }}
+                    {% endif %}
+                </p>
+            </div>
+
+            <div class="catalog-count">
+                Подходящих автомобилей: {{ result_count }}
+            </div>
+        </div>
+
+        {% if errors %}
+            <div class="search-errors">
+                {% for error in errors %}
+                    <p>{{ error }}</p>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <button class="filter-toggle" id="filterToggle">
+            ☰ Фильтры
+        </button>
+
+        <div class="catalog-layout">
+
+            <aside class="filters" id="filters">
+                <div class="filter-title">
+                    <h2>Поиск</h2>
+                    <a href="{% url 'search' %}">Сбросить</a>
+                </div>
+
+                <form method="get" action="{% url 'search' %}">
+
+                    <div class="filter-group">
+                        <label for="class">Класс автомобиля</label>
+                        <select name="class" id="class">
+                            <option value="">Все классы</option>
+                            <option value="Эконом" {% if selected_class == 'Эконом' %}selected{% endif %}>Эконом</option>
+                            <option value="Комфорт" {% if selected_class == 'Комфорт' %}selected{% endif %}>Комфорт</option>
+                            <option value="Бизнес" {% if selected_class == 'Бизнес' %}selected{% endif %}>Бизнес</option>
+                        </select>
+                    </div>
+
+                    <div class="filter-group">
+                        <label for="start_date">Дата получения</label>
+                        <input type="date" name="start_date" id="start_date"
+                               value="{{ start_date }}">
+                    </div>
+
+                    <div class="filter-group">
+                        <label for="end_date">Дата возврата</label>
+                        <input type="date" name="end_date" id="end_date"
+                               value="{{ end_date }}">
+                    </div>
+
+                    <button type="submit" class="filter-submit">
+                        Найти автомобили
+                    </button>
+                </form>
+            </aside>
+
+            <section class="catalog-content">
+
+                {% if errors %}
+                    <div class="empty-catalog">
+                        <h3>Проверьте даты поиска</h3>
+                        <p>Исправьте указанные ошибки и попробуйте снова.</p>
+                    </div>
+
+                {% elif cars %}
+                    <div class="catalog-grid">
+
+                        {% for car in cars %}
+                        <article class="catalog-card">
+
+                            <div class="catalog-image">
+                                <img src="{{ car.image }}"
+                                     alt="{{ car.name }}"
+                                     width="600"
+                                     height="350"
+                                     loading="lazy">
+                            </div>
+
+                            <div class="catalog-card-body">
+                                <h3>{{ car.name }}</h3>
+                                <p class="car-year">{{ car.year }} год выпуска</p>
+
+                                <div class="car-specs">
+                                    <span>{{ car.car_class }}</span>
+                                    <span>{{ car.gearbox }}</span>
+                                </div>
+
+                                <div class="car-availability">
+                                    Доступен до:
+                                    <strong>{{ car.available_until|date:"d.m.Y" }}</strong>
+                                </div>
+
+                                <div class="catalog-card-bottom">
+                                    <div class="car-price">
+                                        <strong>{{ car.price|floatformat:0 }} ₽</strong>
+                                        <span>/ сутки</span>
+                                    </div>
+
+                                    <a href="{% url 'booking' %}?car={{ car.name|urlencode }}&start_date={{ start_date }}&end_date={{ end_date }}"
+                                       class="rent-button">
+                                        Арендовать
+                                    </a>
+                                </div>
+                            </div>
+                        </article>
+                        {% endfor %}
+
+                    </div>
+
+                    {% if page_obj.paginator.num_pages > 1 %}
+                    <div class="pagination">
+
+                        {% if page_obj.has_previous %}
+                            <a href="?page={{ page_obj.previous_page_number }}&class={{ selected_class|urlencode }}&start_date={{ start_date }}&end_date={{ end_date }}">Назад</a>
+                        {% endif %}
+
+                        {% for number in page_obj.paginator.page_range %}
+                            {% if page_obj.number == number %}
+                                <span class="current-page">{{ number }}</span>
+                            {% else %}
+                                <a href="?page={{ number }}&class={{ selected_class|urlencode }}&start_date={{ start_date }}&end_date={{ end_date }}">{{ number }}</a>
+                            {% endif %}
+                        {% endfor %}
+
+                        {% if page_obj.has_next %}
+                            <a href="?page={{ page_obj.next_page_number }}&class={{ selected_class|urlencode }}&start_date={{ start_date }}&end_date={{ end_date }}">Вперёд</a>
+                        {% endif %}
+
+                    </div>
+                    {% endif %}
+
+                {% else %}
+                    <div class="search-empty">
+                        <div class="search-empty-icon">🚗</div>
+                        <h2>К сожалению, на эти даты всё занято</h2>
+                        <p>
+                            Попробуйте выбрать другие даты или посмотреть автомобили другого класса.
+                        </p>
+                        <a href="{% url 'catalog' %}" class="rent-button">
+                            Смотреть другие классы
+                        </a>
+                    </div>
+                {% endif %}
+
+            </section>
+        </div>
+    </div>
+</main>
+
+<footer class="footer">
+    <div class="container">
+        <p>© 2026 AutoRent. Прокат автомобилей.</p>
+    </div>
+</footer>
+
+<script src="{% static 'js/main.js' %}"></script>
+</body>
+</html>
