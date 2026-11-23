@@ -234,6 +234,23 @@
                             </option>
                         </select>
                     </div>
+                    <div class="filter-group">
+                        <label for="gearbox">Коробка передач</label>
+
+                        <select name="gearbox" id="gearbox">
+                            <option value="">Любая</option>
+
+                            <option value="Автомат"
+                                {% if selected_gearbox == 'Автомат' %}selected{% endif %}>
+                                Автомат
+                            </option>
+
+                            <option value="Механика"
+                                {% if selected_gearbox == 'Механика' %}selected{% endif %}>
+                                Механика
+                            </option>
+                        </select>
+                    </div>
 
                     <div class="filter-group">
                         <label for="max_price">Цена за сутки, до</label>
