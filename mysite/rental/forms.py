@@ -104,3 +104,29 @@ class BookingForm(forms.Form):
             )
 
         return license_date
+
+
+from .models import DamageFine
+
+
+class ReturnCarForm(forms.Form):
+    mileage = forms.IntegerField(
+        label='Пробег при возврате',
+        min_value=0,
+        required=True
+    )
+
+    condition = forms.CharField(
+        label='Состояние автомобиля',
+        widget=forms.Textarea(attrs={'rows': 4}),
+        min_length=3,
+        required=True
+    )
+
+    damages = forms.ModelMultipleChoiceField(
+        label='Обнаруженные повреждения',
+        queryset=DamageFine.objects.all(),
+        required=False,
+        widget=forms.CheckboxSelectMultiple
+    )
+

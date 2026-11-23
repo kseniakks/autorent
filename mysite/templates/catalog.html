@@ -7,6 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Каталог автомобилей — AutoRent</title>
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
+
     <style>
         .catalog-tools {
             display: flex;
@@ -37,6 +38,18 @@
             border-color: #315b91;
         }
 
+        .catalog-image {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .catalog-image img {
+            display: block;
+            width: 100%;
+            height: 220px;
+            object-fit: cover;
+        }
+
         .favorite-button {
             position: absolute;
             top: 12px;
@@ -51,16 +64,40 @@
             z-index: 2;
         }
 
-        .catalog-image {
-            position: relative;
-        }
-
         .favorite-button.selected {
             color: #d62828;
         }
 
+        .car-status {
+            position: absolute;
+            top: 12px;
+            left: 12px;
+            padding: 7px 12px;
+            background: #f0ad4e;
+            color: #222;
+            border-radius: 4px;
+            font-size: 13px;
+        }
+
+        .repair-status {
+            background: #dc3545;
+            color: white;
+        }
+
         .catalog-card.hidden-by-filter {
             display: none;
+        }
+
+        .car-specs {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin: 12px 0;
+        }
+
+        .car-year {
+            margin: 5px 0;
+            color: #777;
         }
 
         .dynamic-empty {
@@ -75,12 +112,29 @@
             color: #666;
             font-size: 14px;
         }
+
+        .empty-catalog {
+            padding: 30px;
+            text-align: center;
+            width: 100%;
+        }
+
+        .catalog-image-placeholder {
+            height: 220px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #e9edf2;
+            color: #555;
+        }
     </style>
 </head>
+
 <body>
 
 <header class="header">
     <div class="container header-inner">
+
         <a href="/" class="logo">Auto<span>Rent</span></a>
 
         <button class="burger" id="burger" aria-label="Открыть меню">
@@ -97,13 +151,16 @@
             <a href="{% url 'rules' %}">Правила проката</a>
             <a href="{% url 'profile' %}">Личный кабинет</a>
         </nav>
+
     </div>
 </header>
 
 <main class="catalog-page">
+
     <div class="container">
 
         <div class="catalog-heading">
+
             <div>
                 <span class="section-label">НАШ АВТОПАРК</span>
                 <h1>Каталог автомобилей</h1>
@@ -114,25 +171,31 @@
                 Найдено автомобилей:
                 <strong id="visibleCount">{{ page_obj.paginator.count }}</strong>
             </div>
+
         </div>
 
         <div class="catalog-tools">
+
             <input
                 type="text"
                 id="carSearch"
                 class="catalog-search"
                 placeholder="Поиск автомобиля по названию..."
-                aria-label="Поиск автомобиля"
+                aria-label="Поиск автомобиля по названию"
+                autocomplete="off"
             >
 
-            <button type="button" class="favorites-toggle" id="favoritesToggle">
+            <button
+                type="button"
+                class="favorites-toggle"
+                id="favoritesToggle"
+            >
                 ♥ Избранное (<span id="favoritesCount">0</span>)
             </button>
+
         </div>
 
-        <p class="catalog-tools-info" id="searchInfo">
-            Поиск работает сразу, без перезагрузки страницы.
-        </p>
+        <p class="catalog-tools-info" id="catalogSearchStatus" aria-live="polite">Поиск работает сразу, без перезагрузки страницы.</p>
 
         <button class="filter-toggle" id="filterToggle">
             ☰ Фильтры
@@ -141,6 +204,7 @@
         <div class="catalog-layout">
 
             <aside class="filters" id="filters">
+
                 <div class="filter-title">
                     <h2>Фильтры</h2>
                     <a href="{% url 'catalog' %}">Сбросить</a>
@@ -150,55 +214,83 @@
 
                     <div class="filter-group">
                         <label for="class">Класс автомобиля</label>
+
                         <select name="class" id="class">
                             <option value="">Все классы</option>
-                            <option value="Эконом" {% if selected_class == 'Эконом' %}selected{% endif %}>Эконом</option>
-                            <option value="Комфорт" {% if selected_class == 'Комфорт' %}selected{% endif %}>Комфорт</option>
-                            <option value="Бизнес" {% if selected_class == 'Бизнес' %}selected{% endif %}>Бизнес</option>
-                        </select>
-                    </div>
 
-                    <div class="filter-group">
-                        <label for="gearbox">Коробка передач</label>
-                        <select name="gearbox" id="gearbox">
-                            <option value="">Любая</option>
-                            <option value="Автомат" {% if selected_gearbox == 'Автомат' %}selected{% endif %}>Автомат</option>
-                            <option value="Механика" {% if selected_gearbox == 'Механика' %}selected{% endif %}>Механика</option>
+                            <option value="эконом"
+                                {% if selected_class|lower == 'эконом' %}selected{% endif %}>
+                                Эконом
+                            </option>
+
+                            <option value="комфорт"
+                                {% if selected_class|lower == 'комфорт' %}selected{% endif %}>
+                                Комфорт
+                            </option>
+
+                            <option value="бизнес"
+                                {% if selected_class|lower == 'бизнес' %}selected{% endif %}>
+                                Бизнес
+                            </option>
                         </select>
                     </div>
 
                     <div class="filter-group">
                         <label for="max_price">Цена за сутки, до</label>
+
                         <select name="max_price" id="max_price">
                             <option value="">Любая цена</option>
-                            <option value="3000" {% if selected_max_price == '3000' %}selected{% endif %}>3 000 ₽</option>
-                            <option value="5000" {% if selected_max_price == '5000' %}selected{% endif %}>5 000 ₽</option>
-                            <option value="7000" {% if selected_max_price == '7000' %}selected{% endif %}>7 000 ₽</option>
+
+                            <option value="3000"
+                                {% if selected_max_price == '3000' %}selected{% endif %}>
+                                3 000 ₽
+                            </option>
+
+                            <option value="5000"
+                                {% if selected_max_price == '5000' %}selected{% endif %}>
+                                5 000 ₽
+                            </option>
+
+                            <option value="7000"
+                                {% if selected_max_price == '7000' %}selected{% endif %}>
+                                7 000 ₽
+                            </option>
                         </select>
                     </div>
 
-                    <button type="submit" class="filter-submit">Применить</button>
+                    <button type="submit" class="filter-submit">
+                        Применить
+                    </button>
+
                 </form>
+
             </aside>
 
             <section class="catalog-content">
+
                 <div class="catalog-grid" id="catalogGrid">
 
                     {% for car in cars %}
+
                     <article
                         class="catalog-card {% if car.status != 'available' %}car-unavailable{% endif %}"
                         data-name="{{ car.name|lower }}"
-                        data-car-id="{{ car.id|default:car.name }}"
+                        data-car-id="{{ car.id }}"
                     >
 
                         <div class="catalog-image">
-                            <img
-                                src="{{ car.image }}"
-                                alt="{{ car.name }}"
-                                width="600"
-                                height="350"
-                                loading="lazy"
-                            >
+
+                            {% if car.image %}
+                                <img
+                                    src="{{ car.image }}"
+                                    alt="{{ car.name }}"
+                                    loading="lazy"
+                                >
+                            {% else %}
+                                <div class="catalog-image-placeholder">
+                                    {{ car.name }}
+                                </div>
+                            {% endif %}
 
                             <button
                                 type="button"
@@ -208,54 +300,72 @@
                             >♡</button>
 
                             {% if car.status == 'rented' %}
-                                <span class="car-status">В аренде</span>
+                                <span class="car-status">
+                                    В аренде
+                                </span>
                             {% elif car.status == 'repair' %}
-                                <span class="car-status repair-status">В ремонте</span>
+                                <span class="car-status repair-status">
+                                    В ремонте
+                                </span>
                             {% endif %}
+
                         </div>
 
                         <div class="catalog-card-body">
+
                             <h3>{{ car.name }}</h3>
-                            <p class="car-year">{{ car.year }} год выпуска</p>
+
+                            <p class="car-year">
+                                {{ car.year }} год выпуска
+                            </p>
 
                             <div class="car-specs">
-                                <span>{{ car.car_class }}</span>
+                                <span>{{ car.car_class.name }}</span>
                                 <span>{{ car.gearbox }}</span>
                             </div>
 
-                            <div class="car-availability">
-                                Доступен до:
-                                <strong>{{ car.available_until|date:"d.m.Y" }}</strong>
-                            </div>
-
                             <div class="catalog-card-bottom">
+
                                 <div class="car-price">
-                                    <strong>{{ car.price|floatformat:0 }} ₽</strong>
+                                    <strong>
+                                        {{ car.tariff.price_per_day|floatformat:0 }} ₽
+                                    </strong>
                                     <span>/ сутки</span>
                                 </div>
 
                                 {% if car.status == 'available' %}
+
                                     <a
                                         href="/booking/?car={{ car.name|urlencode }}"
                                         class="rent-button"
                                     >
                                         Арендовать
                                     </a>
+
                                 {% else %}
+
                                     <button class="rent-button" disabled>
                                         Недоступен
                                     </button>
+
                                 {% endif %}
+
                             </div>
+
                         </div>
+
                     </article>
 
                     {% empty %}
+
                     <div class="empty-catalog">
                         <h3>Автомобили не найдены</h3>
                         <p>Попробуйте изменить параметры фильтра.</p>
-                        <a href="{% url 'catalog' %}">Сбросить фильтры</a>
+                        <a href="{% url 'catalog' %}">
+                            Сбросить фильтры
+                        </a>
                     </div>
+
                     {% endfor %}
 
                 </div>
@@ -266,30 +376,43 @@
                 </div>
 
                 {% if page_obj.paginator.num_pages > 1 %}
+
                 <div class="pagination">
 
                     {% if page_obj.has_previous %}
-                        <a href="?page={{ page_obj.previous_page_number }}&class={{ selected_class }}&gearbox={{ selected_gearbox }}&max_price={{ selected_max_price }}">Назад</a>
+                        <a href="?page={{ page_obj.previous_page_number }}&class={{ selected_class }}&max_price={{ selected_max_price }}">
+                            Назад
+                        </a>
                     {% endif %}
 
                     {% for number in page_obj.paginator.page_range %}
+
                         {% if page_obj.number == number %}
                             <span class="current-page">{{ number }}</span>
                         {% else %}
-                            <a href="?page={{ number }}&class={{ selected_class }}&gearbox={{ selected_gearbox }}&max_price={{ selected_max_price }}">{{ number }}</a>
+                            <a href="?page={{ number }}&class={{ selected_class }}&max_price={{ selected_max_price }}">
+                                {{ number }}
+                            </a>
                         {% endif %}
+
                     {% endfor %}
 
                     {% if page_obj.has_next %}
-                        <a href="?page={{ page_obj.next_page_number }}&class={{ selected_class }}&gearbox={{ selected_gearbox }}&max_price={{ selected_max_price }}">Вперёд</a>
+                        <a href="?page={{ page_obj.next_page_number }}&class={{ selected_class }}&max_price={{ selected_max_price }}">
+                            Вперёд
+                        </a>
                     {% endif %}
 
                 </div>
+
                 {% endif %}
 
             </section>
+
         </div>
+
     </div>
+
 </main>
 
 <footer class="footer">
@@ -298,102 +421,9 @@
     </div>
 </footer>
 
-<script>
-document.addEventListener('DOMContentLoaded', function () {
-    const searchInput = document.getElementById('carSearch');
-    const cards = Array.from(document.querySelectorAll('.catalog-card'));
-    const visibleCount = document.getElementById('visibleCount');
-    const dynamicEmpty = document.getElementById('dynamicEmpty');
-    const favoritesToggle = document.getElementById('favoritesToggle');
-    const favoritesCount = document.getElementById('favoritesCount');
 
-    let showFavoritesOnly = false;
-    let favorites = [];
 
-    try {
-        favorites = JSON.parse(localStorage.getItem('autorentFavorites')) || [];
-    } catch (error) {
-        favorites = [];
-    }
-
-    function updateCatalog() {
-        const query = searchInput.value.trim().toLowerCase();
-        let count = 0;
-
-        cards.forEach(function (card) {
-            const name = card.dataset.name || '';
-            const id = card.dataset.carId;
-            const isFavorite = favorites.includes(id);
-
-            const matchesSearch = name.includes(query);
-            const matchesFavorites = !showFavoritesOnly || isFavorite;
-
-            const isVisible = matchesSearch && matchesFavorites;
-
-            card.classList.toggle('hidden-by-filter', !isVisible);
-
-            if (isVisible) {
-                count++;
-            }
-        });
-
-        visibleCount.textContent = count;
-        dynamicEmpty.style.display = count === 0 ? 'block' : 'none';
-    }
-
-    function updateFavorites() {
-        favoritesCount.textContent = favorites.length;
-
-        cards.forEach(function (card) {
-            const button = card.querySelector('.favorite-button');
-            const id = card.dataset.carId;
-            const isFavorite = favorites.includes(id);
-
-            button.classList.toggle('selected', isFavorite);
-            button.textContent = isFavorite ? '♥' : '♡';
-            button.title = isFavorite
-                ? 'Удалить из избранного'
-                : 'Добавить в избранное';
-        });
-
-        localStorage.setItem('autorentFavorites', JSON.stringify(favorites));
-        updateCatalog();
-    }
-
-    searchInput.addEventListener('input', updateCatalog);
-
-    cards.forEach(function (card) {
-        const button = card.querySelector('.favorite-button');
-        const id = card.dataset.carId;
-
-        button.addEventListener('click', function () {
-            if (favorites.includes(id)) {
-                favorites = favorites.filter(function (item) {
-                    return item !== id;
-                });
-            } else {
-                favorites.push(id);
-            }
-
-            updateFavorites();
-        });
-    });
-
-    favoritesToggle.addEventListener('click', function () {
-        showFavoritesOnly = !showFavoritesOnly;
-        favoritesToggle.classList.toggle('active', showFavoritesOnly);
-        favoritesToggle.innerHTML = showFavoritesOnly
-            ? '♥ Показать все автомобили (<span id="favoritesCount">' + favorites.length + '</span>)'
-            : '♥ Избранное (<span id="favoritesCount">' + favorites.length + '</span>)';
-
-        updateCatalog();
-    });
-
-    updateFavorites();
-});
-</script>
-
-<script src="{% static 'js/main.js' %}"></script>
+<script src="{% static 'js/main.js' %}?v=5"></script>
 
 </body>
 </html>

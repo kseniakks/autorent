@@ -1,4 +1,3 @@
-
 {% load static %}
 <!DOCTYPE html>
 <html lang="ru">
@@ -15,9 +14,7 @@
         <a href="/" class="logo">Auto<span>Rent</span></a>
 
         <button class="burger" id="burger" aria-label="Открыть меню">
-            <span></span>
-            <span></span>
-            <span></span>
+            <span></span><span></span><span></span>
         </button>
 
         <nav class="nav" id="nav">
@@ -32,7 +29,6 @@
 
 <main class="profile-page">
     <div class="container">
-
         <div class="profile-heading">
             <span class="section-label">ЛИЧНЫЙ КАБИНЕТ</span>
             <h1>Мой профиль</h1>
@@ -40,11 +36,9 @@
         </div>
 
         <div class="profile-layout">
-
             <aside class="profile-sidebar">
                 <button class="profile-menu-toggle" id="profileMenuToggle">
-                    <span>Меню профиля</span>
-                    <span>⌄</span>
+                    <span>Меню профиля</span><span>⌄</span>
                 </button>
 
                 <nav class="profile-menu" id="profileMenu">
@@ -61,17 +55,22 @@
                         <span>＋</span> Арендовать автомобиль
                     </a>
                 </nav>
+
+                <form action="{% url 'logout' %}" method="post" class="logout-form">
+                    {% csrf_token %}
+                    <button type="submit" class="profile-menu-link logout-button">
+                        <span>↪</span> Выйти из аккаунта
+                    </button>
+                </form>
             </aside>
 
             <section class="profile-content">
-
                 <div class="profile-info-card" id="profile-info">
                     <h2>Мои данные</h2>
-
                     <div class="profile-user">
-                        <div class="profile-avatar">И</div>
+                        <div class="profile-avatar">{{ profile_initial }}</div>
                         <div>
-                            <h3>Иван Иванов</h3>
+                            <h3>{{ profile_name }}</h3>
                             <p>Клиент AutoRent</p>
                         </div>
                     </div>
@@ -79,18 +78,17 @@
                     <div class="profile-data">
                         <div>
                             <span>Телефон</span>
-                            <strong>+7 (999) 123-45-67</strong>
+                            <strong>{{ profile_phone }}</strong>
                         </div>
                         <div>
                             <span>Email</span>
-                            <strong>ivan@example.com</strong>
+                            <strong>{{ profile_email }}</strong>
                         </div>
                     </div>
                 </div>
 
                 <div class="active-rent-section" id="active-rent">
                     <h2>Активная аренда</h2>
-
                     {% if active_rent %}
                     <div class="active-rent-card">
                         <div class="active-rent-top">
@@ -98,7 +96,7 @@
                                 <span class="rent-label">ТЕКУЩИЙ ЗАКАЗ</span>
                                 <h3>{{ active_rent.car_name }}</h3>
                             </div>
-                            <span class="rent-active-status">Активна</span>
+                            <span class="rent-active-status">{{ active_rent.status }}</span>
                         </div>
 
                         <div class="rent-details">
@@ -124,19 +122,15 @@
                     <div class="no-active-rent">
                         <h3>У вас пока нет активной аренды</h3>
                         <p>Выберите автомобиль из нашего каталога.</p>
-                        <a href="{% url 'catalog' %}" class="profile-action">
-                            Перейти в каталог
-                        </a>
+                        <a href="{% url 'catalog' %}" class="profile-action">Перейти в каталог</a>
                     </div>
                     {% endif %}
                 </div>
 
                 <div class="rent-history-section" id="rent-history">
                     <h2>История аренд</h2>
-
                     {% for rent in rent_history %}
                     <article class="history-card">
-
                         <div class="history-card-heading">
                             <div>
                                 <h3>{{ rent.car_name }}</h3>
@@ -155,23 +149,19 @@
 
                         <div class="return-act">
                             <h4>Акт возврата</h4>
-
                             <div class="return-act-row">
                                 <span>Пробег при возврате</span>
-                                <strong>{{ rent.mileage|floatformat:1 }} км</strong>
+                                <strong>{{ rent.mileage }} км</strong>
                             </div>
-
                             <div class="return-act-row">
                                 <span>Состояние автомобиля</span>
                                 <strong>{{ rent.condition }}</strong>
                             </div>
-
                             <div class="return-act-row fine-row">
                                 <span>Штраф за повреждения</span>
                                 <strong>{{ rent.fine|floatformat:0 }} ₽</strong>
                             </div>
                         </div>
-
                     </article>
                     {% empty %}
                     <div class="no-active-rent">
@@ -179,7 +169,6 @@
                     </div>
                     {% endfor %}
                 </div>
-
             </section>
         </div>
     </div>

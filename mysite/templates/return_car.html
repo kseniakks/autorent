@@ -1,0 +1,58 @@
+
+{% load static %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Возврат автомобиля — AutoRent</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+
+<header class="header">
+    <div class="container header-inner">
+        <a href="/" class="logo">AutoRent</a>
+        <nav class="nav">
+            <a href="/">Главная</a>
+            <a href="/catalog/">Каталог</a>
+            <a href="/profile/">Профиль</a>
+        </nav>
+    </div>
+</header>
+
+<main class="container">
+    <h1>Возврат автомобиля</h1>
+
+    <h2>{{ rental.car.name }}</h2>
+    <p>Клиент: {{ rental.client.full_name }}</p>
+    <p>Период аренды: {{ rental.start_date }} — {{ rental.end_date }}</p>
+    <p>Текущий пробег: {{ rental.car.mileage }} км</p>
+
+    <form method="post">
+        {% csrf_token %}
+
+        {% for field in form %}
+            <div class="form-group">
+                <label>{{ field.label }}</label>
+                {{ field }}
+                {% for error in field.errors %}
+                    <p class="error">{{ error }}</p>
+                {% endfor %}
+            </div>
+        {% endfor %}
+
+        {% if form.non_field_errors %}
+            {% for error in form.non_field_errors %}
+                <p class="error">{{ error }}</p>
+            {% endfor %}
+        {% endif %}
+
+        <button type="submit" class="btn">Оформить возврат</button>
+    </form>
+
+    <a href="/profile/">Вернуться в профиль</a>
+</main>
+
+</body>
+</html>
