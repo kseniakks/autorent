@@ -1,5 +1,6 @@
 
 {% load static %}
+{% load l10n %}
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -7,6 +8,41 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Бронирование автомобиля — AutoRent</title>
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <style>
+        .booking-price {
+            margin: 25px 0;
+            padding: 22px;
+            border: 1px solid #ddd;
+            border-radius: 12px;
+            background: #f8f8f8;
+        }
+
+        .booking-price h2 {
+            margin-top: 0;
+            margin-bottom: 18px;
+        }
+
+        .booking-price-row {
+            display: flex;
+            justify-content: space-between;
+            gap: 15px;
+            margin: 12px 0;
+        }
+
+        .booking-price-total {
+            padding-top: 15px;
+            margin-top: 15px;
+            border-top: 1px solid #ccc;
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .booking-price-note {
+            margin-bottom: 0;
+            color: #666;
+            font-size: 13px;
+        }
+    </style>
 </head>
 <body>
 
@@ -43,7 +79,7 @@
         {% if success %}
             <div class="booking-success">
                 <h2>Заявка заполнена!</h2>
-                <p>Форма прошла проверку. Сохранение бронирования подключим после настройки базы данных.</p>
+                <p>Форма прошла проверку.</p>
                 <a href="{% url 'catalog' %}">Вернуться в каталог</a>
             </div>
         {% else %}
@@ -69,12 +105,12 @@
         </div>
 
         {% if messages %}
-    {% for message in messages %}
-        <div class="success-message">
-            {{ message }}
-        </div>
-    {% endfor %}
-{% endif %}
+            {% for message in messages %}
+                <div class="success-message">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
 
         <form method="post"
               action="{% url 'booking' %}"
@@ -108,6 +144,34 @@
                 {% endfor %}
             </div>
 
+            <section class="booking-price" aria-live="polite">
+                <h2>Расчёт стоимости</h2>
+
+                <div class="booking-price-row">
+                    <span>Стоимость за сутки:</span>
+                    <strong id="pricePerDay">—</strong>
+                </div>
+
+                <div class="booking-price-row">
+                    <span>Количество дней:</span>
+                    <strong id="rentalDays">—</strong>
+                </div>
+
+                <div class="booking-price-row booking-price-total">
+                    <span>Итого за аренду:</span>
+                    <strong id="totalPrice">—</strong>
+                </div>
+
+                <div class="booking-price-row">
+                    <span>Залог:</span>
+                    <strong id="depositPrice">—</strong>
+                </div>
+
+                <p class="booking-price-note" id="priceMessage">
+                    Введите название автомобиля и выберите даты аренды.
+                </p>
+            </section>
+
             <div class="form-group">
                 <label for="{{ form.full_name.id_for_label }}">ФИО</label>
                 {{ form.full_name }}
@@ -133,7 +197,9 @@
             </div>
 
             <div class="form-group">
-                <label for="{{ form.license_number.id_for_label }}">Номер водительского удостоверения</label>
+                <label for="{{ form.license_number.id_for_label }}">
+                    Номер водительского удостоверения
+                </label>
                 {{ form.license_number }}
                 {% for error in form.license_number.errors %}
                     <div class="field-error">{{ error }}</div>
@@ -141,7 +207,9 @@
             </div>
 
             <div class="form-group">
-                <label for="{{ form.license_date.id_for_label }}">Дата выдачи удостоверения</label>
+                <label for="{{ form.license_date.id_for_label }}">
+                    Дата выдачи удостоверения
+                </label>
                 {{ form.license_date }}
                 {% for error in form.license_date.errors %}
                     <div class="field-error">{{ error }}</div>
@@ -161,6 +229,8 @@
     </div>
 </footer>
 
+{{ cars_for_booking|json_script:"booking-cars-data" }}
+
 <script src="{% static 'js/main.js' %}"></script>
 
 <script>
@@ -175,29 +245,91 @@ document.addEventListener('DOMContentLoaded', function () {
         'input:not([type="hidden"]), select, textarea'
     );
 
-    // Настраиваем обязательные поля
+    const carField = form.querySelector('[name="car_name"]');
+    const startField = form.querySelector('[name="start_date"]');
+    const endField = form.querySelector('[name="end_date"]');
+
+    const pricePerDayElement = document.getElementById('pricePerDay');
+    const rentalDaysElement = document.getElementById('rentalDays');
+    const totalPriceElement = document.getElementById('totalPrice');
+    const depositElement = document.getElementById('depositPrice');
+    const priceMessage = document.getElementById('priceMessage');
+
+    const cars = JSON.parse(
+        document.getElementById('booking-cars-data').textContent
+    );
+
+    function formatMoney(value) {
+        return Number(value).toLocaleString('ru-RU') + ' руб.';
+    }
+
+    function calculatePrice() {
+        const carName = carField.value.trim().toLowerCase();
+
+        const car = cars.find(function (item) {
+            return item.name.trim().toLowerCase() === carName;
+        });
+
+        if (!car) {
+            pricePerDayElement.textContent = '—';
+            rentalDaysElement.textContent = '—';
+            totalPriceElement.textContent = '—';
+            depositElement.textContent = '—';
+            priceMessage.textContent =
+                'Введите точное название автомобиля из каталога.';
+            return;
+        }
+
+        const price = Number(car.tariff__price_per_day);
+        const deposit = Number(car.tariff__deposit);
+
+        pricePerDayElement.textContent = formatMoney(price);
+        depositElement.textContent = formatMoney(deposit);
+
+        if (!startField.value || !endField.value) {
+            rentalDaysElement.textContent = '—';
+            totalPriceElement.textContent = '—';
+            priceMessage.textContent =
+                'Выберите даты получения и возврата автомобиля.';
+            return;
+        }
+
+        const startDate = new Date(startField.value + 'T00:00:00');
+        const endDate = new Date(endField.value + 'T00:00:00');
+
+        const days = Math.round(
+            (endDate - startDate) / (1000 * 60 * 60 * 24)
+        );
+
+        if (days <= 0) {
+            rentalDaysElement.textContent = '—';
+            totalPriceElement.textContent = '—';
+            priceMessage.textContent =
+                'Дата возврата должна быть позже даты получения.';
+            return;
+        }
+
+        const total = price * days;
+
+        rentalDaysElement.textContent = days;
+        totalPriceElement.textContent = formatMoney(total);
+
+        priceMessage.textContent =
+            'Предварительный расчёт. Залог оплачивается отдельно.';
+    }
+
     fields.forEach(function (field) {
         field.required = true;
     });
 
-    // Указываем типы некоторых полей
     const emailField = form.querySelector('[name="email"]');
     const phoneField = form.querySelector('[name="phone"]');
     const nameField = form.querySelector('[name="full_name"]');
 
-    if (emailField) {
-        emailField.type = 'email';
-    }
+    if (emailField) emailField.type = 'email';
+    if (phoneField) phoneField.type = 'tel';
+    if (nameField) nameField.minLength = 2;
 
-    if (phoneField) {
-        phoneField.type = 'tel';
-    }
-
-    if (nameField) {
-        nameField.minLength = 2;
-    }
-
-    // Создаём место для ошибки рядом с полем
     function showError(field, message) {
         let error = field.parentElement.querySelector('.client-error');
 
@@ -211,7 +343,6 @@ document.addEventListener('DOMContentLoaded', function () {
         field.setAttribute('aria-invalid', 'true');
     }
 
-    // Удаляем ошибку
     function clearError(field) {
         const error = field.parentElement.querySelector('.client-error');
 
@@ -222,7 +353,6 @@ document.addEventListener('DOMContentLoaded', function () {
         field.removeAttribute('aria-invalid');
     }
 
-    // Проверяем одно поле
     function validateField(field) {
         clearError(field);
 
@@ -246,7 +376,9 @@ document.addEventListener('DOMContentLoaded', function () {
             const phonePattern = /^[+\d()\-\s]+$/;
             const digits = value.replace(/\D/g, '');
 
-            if (!phonePattern.test(value) || digits.length < 10 || digits.length > 15) {
+            if (!phonePattern.test(value) ||
+                digits.length < 10 ||
+                digits.length > 15) {
                 showError(field, 'Телефон должен содержать от 10 до 15 цифр.');
                 return false;
             }
@@ -264,44 +396,47 @@ document.addEventListener('DOMContentLoaded', function () {
             );
             return false;
         }
-        // Проверка даты возврата
-if (field.name === 'end_date') {
-    const startDate = form.querySelector('[name="start_date"]');
 
-    if (startDate.value && value <= startDate.value) {
-        showError(field, 'Дата возврата должна быть позже даты получения.');
-        return false;
-    }
-}
+        if (field.name === 'end_date') {
+            if (startField.value && value <= startField.value) {
+                showError(
+                    field,
+                    'Дата возврата должна быть позже даты получения.'
+                );
+                return false;
+            }
+        }
 
-// Проверка даты выдачи водительского удостоверения
-if (field.name === 'license_date') {
-    const today = new Date();
-    const selectedDate = new Date(value + 'T00:00:00');
+        if (field.name === 'license_date' && value) {
+            const today = new Date();
+            const selectedDate = new Date(value + 'T00:00:00');
 
-    today.setHours(0, 0, 0, 0);
+            today.setHours(0, 0, 0, 0);
 
-    if (value && selectedDate > today) {
-        showError(field, 'Дата выдачи удостоверения не может быть в будущем.');
-        return false;
-    }
-}
+            if (selectedDate > today) {
+                showError(
+                    field,
+                    'Дата выдачи удостоверения не может быть в будущем.'
+                );
+                return false;
+            }
+        }
 
         return true;
     }
 
-    // Убираем ошибку при исправлении поля
     fields.forEach(function (field) {
         field.addEventListener('input', function () {
             validateField(field);
+            calculatePrice();
         });
 
         field.addEventListener('change', function () {
             validateField(field);
+            calculatePrice();
         });
     });
 
-    // Проверка перед отправкой формы
     form.addEventListener('submit', function (event) {
         let formIsValid = true;
         let firstInvalidField = null;
@@ -323,6 +458,8 @@ if (field.name === 'license_date') {
             firstInvalidField.focus();
         }
     });
+
+    calculatePrice();
 });
 </script>
 

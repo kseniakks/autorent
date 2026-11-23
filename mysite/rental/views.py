@@ -91,7 +91,17 @@ def catalog_api(request):
     })
 
 
+
 def booking(request):
+    # Передаём в шаблон автомобили, их стоимость за день и залог
+    cars_for_booking = list(
+        Car.objects.select_related('tariff').values(
+            'name',
+            'tariff__price_per_day',
+            'tariff__deposit'
+        )
+    )
+
     if request.method == 'POST':
         form = BookingForm(request.POST)
 
@@ -139,7 +149,6 @@ def booking(request):
                     )
 
                 else:
-                    # Ищем клиента, уже связанного с аккаунтом
                     client = None
 
                     if request.user.is_authenticated:
@@ -147,8 +156,6 @@ def booking(request):
                             user=request.user
                         ).first()
 
-                    # Если клиент ещё не связан с аккаунтом,
-                    # ищем его по электронной почте
                     if client is None:
                         client = Client.objects.filter(
                             email=email,
@@ -237,7 +244,11 @@ def booking(request):
 
         form = BookingForm(initial=initial_data)
 
-    return render(request, 'booking.html', {'form': form})
+    return render(request, 'booking.html', {
+        'form': form,
+        'cars_for_booking': cars_for_booking,
+    })
+
 
 
 @login_required(login_url='/accounts/login/')
