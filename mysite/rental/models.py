@@ -84,6 +84,10 @@ class Car(models.Model):
         default=0,
         verbose_name='Пробег'
     )
+    seats = models.PositiveIntegerField(
+        default=5,
+        verbose_name='Количество мест'
+    )
 
     def __str__(self):
         return self.name
