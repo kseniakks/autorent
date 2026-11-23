@@ -1,3 +1,4 @@
+
 from datetime import date, datetime
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required, user_passes_test
@@ -241,7 +242,7 @@ def booking(request):
 
 @login_required(login_url='/accounts/login/')
 def profile(request):
-    # Получаем только клиента, связанного с текущим аккаунтом
+    # Получаем клиента, связанного с текущим аккаунтом
     client = Client.objects.filter(user=request.user).first()
 
     active_rentals = Rental.objects.none()
@@ -306,9 +307,23 @@ def profile(request):
             'fine': fine,
         })
 
+    # Передаём данные клиента в шаблон личного кабинета
+    profile_name = client.full_name if client else request.user.get_full_name()
+
+    if not profile_name:
+        profile_name = request.user.username
+
+    profile_phone = client.phone if client else 'Не указан'
+    profile_email = client.email if client else (request.user.email or 'Не указан')
+    profile_initial = profile_name[0].upper() if profile_name else 'U'
+
     return render(request, 'profile.html', {
         'active_rent': active_rent,
         'rent_history': rent_history,
+        'profile_name': profile_name,
+        'profile_phone': profile_phone,
+        'profile_email': profile_email,
+        'profile_initial': profile_initial,
     })
 
 
