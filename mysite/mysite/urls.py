@@ -1,9 +1,11 @@
 from django.contrib import admin
 from django.urls import path, include
 from rental import views
+from rental import error_views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    
 
     # Авторизация Django
     path('accounts/', include('django.contrib.auth.urls')),
@@ -24,3 +26,6 @@ urlpatterns = [
     path('manager/rentals/', views.manager_rentals, name='manager_rentals'),
     path('manager/issue/<int:rental_id>/', views.issue_rental, name='issue_rental'),
 ]
+handler403 = 'rental.error_views.handler403'
+handler404 = 'rental.error_views.handler404'
+handler500 = 'rental.error_views.handler500'

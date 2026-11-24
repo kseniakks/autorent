@@ -1,0 +1,66 @@
+
+{% load static %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>403 — Доступ запрещён | АвтоПрокат</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #F7F9FC;
+            color: #1D1E24;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        .error-box {
+            width: min(90%, 650px);
+            margin: auto;
+            padding: 55px 35px;
+            background: white;
+            border-radius: 16px;
+            text-align: center;
+            box-shadow: 0 5px 30px rgba(0,0,0,0.06);
+        }
+        .error-number {
+            color: #0A6DDE;
+            font-size: 90px;
+            font-weight: 800;
+            line-height: 1.2;
+        }
+        h1 { margin: 15px 0; font-size: 28px; }
+        p { color: #737987; margin-bottom: 28px; }
+        .error-links {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+        .error-links a {
+            padding: 13px 22px;
+            border-radius: 8px;
+            background: #0A6DDE;
+            color: white;
+            text-decoration: none;
+            font-weight: 600;
+        }
+        .error-links a:hover { background: #0759b8; }
+    </style>
+</head>
+<body>
+    <main class="error-box">
+        <div class="error-number">403</div>
+        <h1>Доступ запрещён</h1>
+        <p>У вас недостаточно прав для просмотра этой страницы или выполнения данного действия.</p>
+        <div class="error-links">
+            <a href="/">На главную</a>
+            <a href="{% url 'search' %}">Поиск автомобилей</a>
+        </div>
+    </main>
+</body>
+</html>
